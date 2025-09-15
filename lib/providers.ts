@@ -1,4 +1,9 @@
 export const PROVIDERS = {
+  anthropic: {
+    name: "Anthropic",
+    max_tokens: 8_192, // Claude 3.5 Sonnet max output tokens
+    id: "anthropic",
+  },
   "fireworks-ai": {
     name: "Fireworks AI",
     max_tokens: 131_000,
@@ -37,6 +42,19 @@ export const PROVIDERS = {
 };
 
 export const MODELS = [
+  {
+    value: "claude-3-5-sonnet-20241022",
+    label: "Claude 3.5 Sonnet",
+    providers: ["anthropic"],
+    autoProvider: "anthropic",
+    isNew: true,
+  },
+  {
+    value: "claude-3-5-haiku-20241022",
+    label: "Claude 3.5 Haiku",
+    providers: ["anthropic"],
+    autoProvider: "anthropic",
+  },
   {
     value: "deepseek-ai/DeepSeek-V3-0324",
     label: "DeepSeek V3 O324",

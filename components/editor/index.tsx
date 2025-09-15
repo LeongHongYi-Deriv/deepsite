@@ -13,7 +13,7 @@ import {
   useUpdateEffect,
 } from "react-use";
 import classNames from "classnames";
-import { useRouter, useSearchParams } from "next/navigation";
+import { /* useRouter, */ useSearchParams } from "next/navigation"; // router disabled
 
 import { Header } from "@/components/editor/header";
 import { Footer } from "@/components/editor/footer";
@@ -49,7 +49,7 @@ export const AppEditor = ({
     );
 
   const searchParams = useSearchParams();
-  const router = useRouter();
+  // const router = useRouter(); // DISABLED - project navigation removed
   const deploy = searchParams.get("deploy") === "true";
 
   const iframeRef = useRef<HTMLIFrameElement | null>(null);
@@ -123,18 +123,10 @@ export const AppEditor = ({
 
   useMount(() => {
     if (deploy && project?._id) {
-      toast.success("Your project is deployed! 🎉", {
-        action: {
-          label: "See Project",
-          onClick: () => {
-            window.open(
-              `https://huggingface.co/spaces/${project?.space_id}`,
-              "_blank"
-            );
-          },
-        },
+      toast.success("Project saved locally! 🎉", {
+        description: "Your project is saved in your browser. Deployment features are disabled in standalone mode.",
       });
-      router.replace(`/projects/${project?.space_id}`);
+      // router.replace(`/projects/${project?.space_id}`); // DISABLED - project management removed
     }
     if (htmlStorage) {
       removeHtmlStorage();
@@ -195,16 +187,12 @@ export const AppEditor = ({
   return (
     <section className="h-[100dvh] bg-neutral-950 flex flex-col">
       <Header tab={currentTab} onNewTab={setCurrentTab}>
-        <LoadProject
-          onSuccess={(project: Project) => {
-            router.push(`/projects/${project.space_id}`);
-          }}
-        />
+        <LoadProject />
         {/* for these buttons pass the whole pages */}
         {project?._id ? (
-          <SaveButton pages={pages} prompts={prompts} />
+          <SaveButton />
         ) : (
-          <DeployButton pages={pages} prompts={prompts} />
+          <DeployButton />
         )}
       </Header>
       <main className="bg-neutral-950 flex-1 max-lg:flex-col flex w-full max-lg:h-[calc(100%-82px)] relative">

@@ -57,7 +57,6 @@ export function History({
                   variant="sky"
                   size="xs"
                   onClick={() => {
-                    console.log(item);
                     setPages(item.pages);
                   }}
                 >

@@ -1,13 +1,10 @@
-import { redirect } from "next/navigation";
-
 import { MyProjects } from "@/components/my-projects";
-import { getProjects } from "@/app/actions/projects";
+
+// REMOVED - HF dependencies
+// import { redirect } from "next/navigation";
+// import { getProjects } from "@/app/actions/projects";
 
 export default async function ProjectsPage() {
-  const { ok, projects } = await getProjects();
-  if (!ok) {
-    redirect("/");
-  }
-
-  return <MyProjects projects={projects} />;
+  // Projects functionality disabled - was dependent on Hugging Face authentication
+  return <MyProjects />;
 }

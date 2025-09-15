@@ -1,63 +1,24 @@
 "use server";
 
-import { isAuthenticated } from "@/lib/auth";
-import { NextResponse } from "next/server";
-import dbConnect from "@/lib/mongodb";
-import Project from "@/models/Project";
-import { Project as ProjectType } from "@/types";
+// REMOVED - All Hugging Face dependencies
+// import { isAuthenticated } from "@/lib/auth";
+// import dbConnect from "@/lib/mongodb";
+// import Project from "@/models/Project";
 
-export async function getProjects(): Promise<{
-  ok: boolean;
-  projects: ProjectType[];
-}> {
-  const user = await isAuthenticated();
-
-  if (user instanceof NextResponse || !user) {
-    return {
-      ok: false,
-      projects: [],
-    };
-  }
-
-  await dbConnect();
-  const projects = await Project.find({
-    user_id: user?.id,
-  })
-    .sort({ _createdAt: -1 })
-    .limit(100)
-    .lean();
-  if (!projects) {
-    return {
-      ok: false,
-      projects: [],
-    };
-  }
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+export async function deleteProject(_spaceId: string) {
+  // Project deletion disabled - was dependent on Hugging Face authentication
   return {
-    ok: true,
-    projects: JSON.parse(JSON.stringify(projects)) as ProjectType[],
+    error: "Project deletion disabled - was dependent on Hugging Face authentication",
+    ok: false,
   };
 }
 
-export async function getProject(
-  namespace: string,
-  repoId: string
-): Promise<ProjectType | null> {
-  const user = await isAuthenticated();
-
-  if (user instanceof NextResponse || !user) {
-    return null;
-  }
-
-  await dbConnect();
-  const project = await Project.findOne({
-    user_id: user.id,
-    namespace,
-    repoId,
-  }).lean();
-
-  if (!project) {
-    return null;
-  }
-
-  return JSON.parse(JSON.stringify(project)) as ProjectType;
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+export async function cloneProject(_sourceSpaceId: string, _title: string) {
+  // Project cloning disabled - was dependent on Hugging Face Spaces
+  return {
+    error: "Project cloning disabled - was dependent on Hugging Face Spaces",
+    ok: false,
+  };
 }

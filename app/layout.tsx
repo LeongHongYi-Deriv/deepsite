@@ -9,7 +9,7 @@ import { Toaster } from "@/components/ui/sonner";
 import MY_TOKEN_KEY from "@/lib/get-cookie-name";
 import { apiServer } from "@/lib/api";
 import AppContext from "@/components/contexts/app-context";
-import Script from "next/script";
+// import Script from "next/script"; // REMOVED - analytics disabled for local deployment
 import IframeDetector from "@/components/iframe-detector";
 
 const inter = Inter({
@@ -31,11 +31,11 @@ export const metadata: Metadata = {
     title: "DeepSite | Build with AI ✨",
     description:
       "DeepSite is a web development tool that helps you build websites with AI, no code required. Let's deploy your website with DeepSite and enjoy the magic of AI.",
-    url: "https://deepsite.hf.co",
+    url: "http://localhost:3000", // Updated for local deployment
     siteName: "DeepSite",
     images: [
       {
-        url: "https://deepsite.hf.co/banner.png",
+        url: "http://localhost:3000/banner.png", // Updated for local deployment
         width: 1200,
         height: 630,
         alt: "DeepSite Open Graph Image",
@@ -47,7 +47,7 @@ export const metadata: Metadata = {
     title: "DeepSite | Build with AI ✨",
     description:
       "DeepSite is a web development tool that helps you build websites with AI, no code required. Let's deploy your website with DeepSite and enjoy the magic of AI.",
-    images: ["https://deepsite.hf.co/banner.png"],
+    images: ["http://localhost:3000/banner.png"], // Updated for local deployment
   },
   appleWebApp: {
     capable: true,
@@ -93,11 +93,12 @@ export default async function RootLayout({
   const data = await getMe();
   return (
     <html lang="en">
-      <Script
+      {/* <Script
         defer
-        data-domain="deepsite.hf.co"
+        data-domain="localhost"
         src="https://plausible.io/js/script.js"
-      ></Script>
+      ></Script> */}
+      {/* Analytics disabled for local deployment */}
       <body
         className={`${inter.variable} ${ptSans.variable} antialiased bg-black dark h-[100dvh] overflow-hidden`}
       >

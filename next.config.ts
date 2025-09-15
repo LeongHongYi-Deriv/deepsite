@@ -25,7 +25,8 @@ const nextConfig: NextConfig = {
     return config;
   },
   images: {
-    remotePatterns: [new URL('https://huggingface.co/**')],
+    // remotePatterns: [new URL('https://huggingface.co/**')], // REMOVED - HF dependency
+    remotePatterns: [], // No external image patterns needed
   },
 };
 

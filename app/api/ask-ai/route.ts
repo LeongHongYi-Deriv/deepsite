@@ -2,7 +2,7 @@
 import type { NextRequest } from "next/server";
 import { NextResponse } from "next/server";
 import { headers } from "next/headers";
-import { InferenceClient } from "@huggingface/inference";
+import { AnthropicClient } from "@/lib/anthropic-client";
 
 import { MODELS, PROVIDERS } from "@/lib/providers";
 import {
@@ -59,7 +59,6 @@ export async function POST(request: NextRequest) {
   }
 
   let token = userToken;
-  let billTo: string | null = null;
 
   /**
    * Handle local usage token, this bypass the need for a user token
@@ -88,7 +87,6 @@ export async function POST(request: NextRequest) {
     }
 
     token = process.env.DEFAULT_HF_TOKEN as string;
-    billTo = "huggingface";
   }
 
   const DEFAULT_PROVIDER = PROVIDERS.novita;
@@ -120,31 +118,28 @@ export async function POST(request: NextRequest) {
     (async () => {
       // let completeResponse = "";
       try {
-        const client = new InferenceClient(token);
-        const chatCompletion = client.chatCompletionStream(
-          {
-            model: selectedModel.value,
-            provider: selectedProvider.id as any,
-            messages: [
-              {
-                role: "system",
-                content: INITIAL_SYSTEM_PROMPT,
-              },
-              ...(pages?.length > 1 ? [{
-                role: "assistant",
-                content: `Here are the current pages:\n\n${pages.map((p: Page) => `- ${p.path} \n${p.html}`).join("\n")}\n\nNow, please create a new page based on this code. Also here are the previous prompts:\n\n${previousPrompts.map((p: string) => `- ${p}`).join("\n")}`
-              }] : []),
-              {
-                role: "user",
-                content: redesignMarkdown
-                  ? `Here is my current design as a markdown:\n\n${redesignMarkdown}\n\nNow, please create a new design based on this markdown.`
-                  : rewrittenPrompt,
-              },
-            ],
-            max_tokens: selectedProvider.max_tokens,
-          },
-          billTo ? { billTo } : {}
-        );
+        const client = new AnthropicClient(token);
+        
+        const chatCompletion = client.chatCompletionStream({
+          model: selectedModel.value,
+          messages: [
+            {
+              role: "system",
+              content: INITIAL_SYSTEM_PROMPT,
+            },
+            ...(pages?.length > 1 ? [{
+              role: "assistant",
+              content: `Here are the current pages:\n\n${pages.map((p: Page) => `- ${p.path} \n${p.html}`).join("\n")}\n\nNow, please create a new page based on this code. Also here are the previous prompts:\n\n${previousPrompts.map((p: string) => `- ${p}`).join("\n")}`
+            }] : []),
+            {
+              role: "user",
+              content: redesignMarkdown
+                ? `Here is my current design as a markdown:\n\n${redesignMarkdown}\n\nNow, please create a new design based on this markdown.`
+                : rewrittenPrompt,
+            },
+          ],
+          max_tokens: selectedProvider.max_tokens,
+        });
 
         while (true) {
           const { done, value } = await chatCompletion.next();
@@ -225,7 +220,6 @@ export async function PUT(request: NextRequest) {
   }
 
   let token = userToken;
-  let billTo: string | null = null;
 
   /**
    * Handle local usage token, this bypass the need for a user token
@@ -254,10 +248,7 @@ export async function PUT(request: NextRequest) {
     }
 
     token = process.env.DEFAULT_HF_TOKEN as string;
-    billTo = "huggingface";
   }
-
-  const client = new InferenceClient(token);
 
   const DEFAULT_PROVIDER = PROVIDERS.novita;
   const selectedProvider =
@@ -265,44 +256,23 @@ export async function PUT(request: NextRequest) {
       ? PROVIDERS[selectedModel.autoProvider as keyof typeof PROVIDERS]
       : PROVIDERS[provider as keyof typeof PROVIDERS] ?? DEFAULT_PROVIDER;
 
-  try {
-    const response = await client.chatCompletion(
-      {
-        model: selectedModel.value,
-        provider: selectedProvider.id as any,
-        messages: [
-          {
-            role: "system",
-            content: FOLLOW_UP_SYSTEM_PROMPT,
-          },
-          {
-            role: "user",
-            content: previousPrompts
-              ? `Also here are the previous prompts:\n\n${previousPrompts.map((p: string) => `- ${p}`).join("\n")}`
-              : "You are modifying the HTML file based on the user's request.",
-          },
-          {
-            role: "assistant",
+  const client = new AnthropicClient(token);
 
-            content: `${
-              selectedElementHtml
-                ? `\n\nYou have to update ONLY the following element, NOTHING ELSE: \n\n\`\`\`html\n${selectedElementHtml}\n\`\`\``
-                : ""
-            }. Current pages: ${pages?.map((p: Page) => `- ${p.path} \n${p.html}`).join("\n")}. ${files?.length > 0 ? `Current images: ${files?.map((f: string) => `- ${f}`).join("\n")}.` : ""}`,
-          },
-          {
-            role: "user",
-            content: prompt,
-          },
-        ],
-        ...(selectedProvider.id !== "sambanova"
-          ? {
-              max_tokens: selectedProvider.max_tokens,
-            }
-          : {}),
-      },
-      billTo ? { billTo } : {}
-    );
+  try {
+    const response = await client.chatCompletion({
+      model: selectedModel.value,
+      messages: [
+        {
+          role: "system",
+          content: FOLLOW_UP_SYSTEM_PROMPT,
+        },
+        {
+          role: "user",
+          content: `Current pages:\n\n${pages.map((p: Page) => `${p.path}:\n${p.html}`).join("\n\n")}\n\nPrevious prompts:\n${previousPrompts.join("\n")}\n\nSelected element HTML:\n${selectedElementHtml || "None"}\n\nFiles:\n${files?.join("\n") || "None"}\n\nUser request: ${prompt}`,
+        },
+      ],
+      max_tokens: selectedProvider.max_tokens,
+    });
 
     const chunk = response.choices[0]?.message?.content;
     if (!chunk) {

@@ -11,8 +11,8 @@ import { Button } from "@/components/ui/button";
 import { Page, Project } from "@/types";
 import Loading from "@/components/loading";
 import { RiCheckboxCircleFill } from "react-icons/ri";
-import { useUser } from "@/hooks/useUser";
-import { LoginModal } from "@/components/login-modal";
+// import { useUser } from "@/hooks/useUser"; // Disabled for standalone mode
+// import { LoginModal } from "@/components/login-modal"; // Disabled for standalone mode
 import { DeployButtonContent } from "../deploy-button/content";
 
 export const Uploader = ({
@@ -34,7 +34,7 @@ export const Uploader = ({
   selectedFiles: string[];
   project?: Project | null;
 }) => {
-  const { user } = useUser();
+  // const { user } = useUser(); // Temporarily disabled - not needed for standalone mode
 
   const [open, setOpen] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -69,7 +69,8 @@ export const Uploader = ({
   };
 
   // TODO FIRST PUBLISH YOUR PROJECT TO UPLOAD IMAGES.
-  return user?.id ? (
+  // DISABLED: Image upload requires Hugging Face - temporarily disabled for standalone use
+  return false ? (
     <Popover open={open} onOpenChange={setOpen}>
       <form>
         <PopoverTrigger asChild>
@@ -191,13 +192,23 @@ export const Uploader = ({
       >
         <Images className="size-4" />
       </Button>
-      <LoginModal
-        open={open}
-        onClose={() => setOpen(false)}
-        pages={pages}
-        title="Log In to add Custom Images"
-        description="Log In through your Hugging Face account to publish your project and increase your monthly free limit."
-      />
+      {/* Image upload temporarily disabled - requires Hugging Face integration */}
+      {open && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50" onClick={() => setOpen(false)}>
+          <div className="bg-white rounded-lg p-6 max-w-sm mx-4" onClick={(e) => e.stopPropagation()}>
+            <h3 className="text-lg font-semibold text-gray-900 mb-2">Image Upload Disabled</h3>
+            <p className="text-gray-600 mb-4">
+              Image upload is temporarily disabled in standalone mode. For now, you can use image URLs directly in your prompts.
+            </p>
+            <button 
+              onClick={() => setOpen(false)}
+              className="w-full bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600"
+            >
+              Got it
+            </button>
+          </div>
+        </div>
+      )}
     </>
   );
 };

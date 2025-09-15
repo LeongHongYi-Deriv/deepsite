@@ -8,14 +8,17 @@ export default function IframeDetector() {
 
   useEffect(() => {
     // Helper function to check if a hostname is from allowed domains
-    const isAllowedDomain = (hostname: string) => {
-      const host = hostname.toLowerCase();
-      return (
-        host.endsWith(".huggingface.co") ||
-        host.endsWith(".hf.co") ||
-        host === "huggingface.co" ||
-        host === "hf.co"
-      );
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    const isAllowedDomain = (_hostname: string) => {
+      // DISABLED - HF dependency removed, allow all domains
+      return true;
+      // const host = hostname.toLowerCase();
+      // return (
+      //   host.endsWith(".huggingface.co") ||
+      //   host.endsWith(".hf.co") ||
+      //   host === "huggingface.co" ||
+      //   host === "hf.co"
+      // );
     };
 
     // Check if the current window is in an iframe
